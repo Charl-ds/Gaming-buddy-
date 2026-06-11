@@ -1,0 +1,1764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Ganesh | Excel Mastery · Data Entry Executive</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;600&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet"/>
+<style>
+/* ============================================================
+   DESIGN TOKENS
+   ============================================================ */
+:root{
+  --bg:          #0A0E1A;
+  --surface:     #111827;
+  --surface2:    #1C2435;
+  --border:      rgba(99,210,140,0.18);
+  --accent:      #63D28C;        /* Excel-green reinterpreted */
+  --accent2:     #3B82F6;        /* data-blue */
+  --accent3:     #F59E0B;        /* gold highlight */
+  --text:        #E8EDF5;
+  --muted:       #7B8FAB;
+  --grid-line:   rgba(99,210,140,0.07);
+  --glow:        0 0 40px rgba(99,210,140,0.25);
+  --font-display:'Playfair Display',serif;
+  --font-body:   'Space Grotesk',sans-serif;
+  --font-mono:   'JetBrains Mono',monospace;
+  --ease:        cubic-bezier(.23,1,.32,1);
+}
+
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:16px}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-body);
+  overflow-x:hidden;
+  line-height:1.6;
+}
+::selection{background:var(--accent);color:#000}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
+
+/* ============================================================
+   ANIMATED GRID BACKGROUND
+   ============================================================ */
+#grid-bg{
+  position:fixed;inset:0;z-index:0;
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size:60px 60px;
+  animation:gridDrift 20s linear infinite;
+  pointer-events:none;
+}
+@keyframes gridDrift{
+  0%{background-position:0 0}
+  100%{background-position:60px 60px}
+}
+
+/* ============================================================
+   PARTICLE CANVAS
+   ============================================================ */
+#particle-canvas{
+  position:fixed;inset:0;z-index:0;
+  pointer-events:none;
+  opacity:.5;
+}
+
+/* ============================================================
+   NAV
+   ============================================================ */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1rem 4vw;
+  background:rgba(10,14,26,.8);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  transition:box-shadow .3s;
+}
+nav.scrolled{box-shadow:0 4px 32px rgba(0,0,0,.5)}
+.nav-logo{
+  font-family:var(--font-mono);
+  font-size:1.1rem;
+  color:var(--accent);
+  letter-spacing:.05em;
+}
+.nav-logo span{color:var(--text)}
+.nav-links{
+  display:flex;gap:2rem;list-style:none;
+}
+.nav-links a{
+  font-size:.875rem;
+  font-weight:500;
+  color:var(--muted);
+  letter-spacing:.05em;
+  transition:color .2s;
+  position:relative;
+}
+.nav-links a::after{
+  content:'';
+  position:absolute;bottom:-4px;left:0;right:0;height:1px;
+  background:var(--accent);
+  transform:scaleX(0);
+  transform-origin:left;
+  transition:transform .3s var(--ease);
+}
+.nav-links a:hover{color:var(--accent)}
+.nav-links a:hover::after{transform:scaleX(1)}
+.nav-cta{
+  background:var(--accent);color:#000;
+  padding:.5rem 1.25rem;
+  border-radius:4px;
+  font-size:.875rem;font-weight:600;
+  transition:box-shadow .2s,transform .2s;
+  cursor:pointer;
+}
+.nav-cta:hover{
+  box-shadow:var(--glow);
+  transform:translateY(-1px);
+}
+
+/* ============================================================
+   SECTIONS SHARED
+   ============================================================ */
+.section{
+  position:relative;z-index:1;
+  padding:7rem 4vw;
+}
+.section-inner{max-width:1200px;margin:0 auto}
+.eyebrow{
+  font-family:var(--font-mono);
+  font-size:.75rem;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--accent);
+  margin-bottom:.75rem;
+}
+.section-title{
+  font-family:var(--font-display);
+  font-size:clamp(2rem,5vw,3.5rem);
+  font-weight:900;
+  line-height:1.1;
+  margin-bottom:1.5rem;
+}
+.section-title span{color:var(--accent)}
+.divider{
+  width:48px;height:3px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  border-radius:2px;
+  margin-bottom:2rem;
+}
+
+/* ============================================================
+   HERO
+   ============================================================ */
+#hero{
+  min-height:100vh;
+  display:flex;align-items:center;
+  padding:0 4vw;
+  position:relative;z-index:1;
+  overflow:hidden;
+}
+.hero-inner{
+  max-width:1200px;margin:0 auto;
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:4rem;align-items:center;
+  width:100%;
+}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:.5rem;
+  background:rgba(99,210,140,.12);
+  border:1px solid rgba(99,210,140,.3);
+  border-radius:100px;
+  padding:.375rem 1rem;
+  font-family:var(--font-mono);
+  font-size:.75rem;
+  color:var(--accent);
+  letter-spacing:.1em;
+  margin-bottom:1.5rem;
+}
+.badge-dot{
+  width:6px;height:6px;
+  border-radius:50%;
+  background:var(--accent);
+  animation:pulse 2s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.7)}}
+.hero-title{
+  font-family:var(--font-display);
+  font-size:clamp(2.8rem,6vw,5rem);
+  font-weight:900;
+  line-height:1.05;
+  margin-bottom:1.5rem;
+}
+.hero-title .line1{display:block;color:var(--text)}
+.hero-title .line2{
+  display:block;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.hero-title .line3{display:block;color:var(--muted);font-size:70%}
+.hero-desc{
+  color:var(--muted);
+  font-size:1.05rem;
+  max-width:480px;
+  margin-bottom:2.5rem;
+  line-height:1.75;
+}
+.hero-actions{display:flex;gap:1rem;flex-wrap:wrap}
+.btn-primary{
+  display:inline-flex;align-items:center;gap:.5rem;
+  background:var(--accent);color:#000;
+  padding:.875rem 2rem;
+  border-radius:6px;
+  font-weight:700;font-size:.95rem;
+  transition:box-shadow .2s,transform .2s;
+  cursor:pointer;
+}
+.btn-primary:hover{box-shadow:var(--glow);transform:translateY(-2px)}
+.btn-secondary{
+  display:inline-flex;align-items:center;gap:.5rem;
+  background:transparent;
+  border:1px solid var(--border);
+  color:var(--text);
+  padding:.875rem 2rem;
+  border-radius:6px;
+  font-weight:600;font-size:.95rem;
+  transition:border-color .2s,background .2s;
+  cursor:pointer;
+}
+.btn-secondary:hover{border-color:var(--accent);background:rgba(99,210,140,.06)}
+.hero-stats{
+  display:flex;gap:2.5rem;
+  margin-top:3rem;
+  padding-top:2rem;
+  border-top:1px solid var(--border);
+}
+.stat-item{}
+.stat-num{
+  font-family:var(--font-mono);
+  font-size:2rem;font-weight:600;
+  color:var(--accent);
+  display:block;
+}
+.stat-label{font-size:.8rem;color:var(--muted);letter-spacing:.05em}
+
+/* ============================================================
+   HERO EXCEL VISUALISATION (right side)
+   ============================================================ */
+.hero-visual{
+  position:relative;
+  display:flex;align-items:center;justify-content:center;
+}
+.excel-window{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:12px;
+  overflow:hidden;
+  box-shadow:0 24px 80px rgba(0,0,0,.6),var(--glow);
+  width:100%;
+  max-width:520px;
+  animation:floatUp 6s ease-in-out infinite;
+}
+@keyframes floatUp{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.excel-titlebar{
+  display:flex;align-items:center;gap:.5rem;
+  padding:.75rem 1rem;
+  background:var(--surface2);
+  border-bottom:1px solid var(--border);
+}
+.traffic-dot{width:12px;height:12px;border-radius:50%}
+.td-red{background:#FF5F57}
+.td-yellow{background:#FFBD2E}
+.td-green{background:#28CA41}
+.excel-filename{
+  font-family:var(--font-mono);font-size:.75rem;
+  color:var(--muted);margin-left:.5rem;
+}
+.excel-ribbon{
+  display:flex;gap:1.5rem;
+  padding:.5rem 1rem;
+  background:rgba(28,36,53,.6);
+  border-bottom:1px solid var(--border);
+  font-size:.7rem;color:var(--muted);
+  font-family:var(--font-mono);
+}
+.ribbon-item.active{color:var(--accent)}
+.excel-grid{padding:.75rem}
+.grid-header{
+  display:grid;
+  grid-template-columns:40px repeat(6, 1fr);
+  gap:2px;margin-bottom:2px;
+}
+.cell-head{
+  font-family:var(--font-mono);font-size:.65rem;
+  color:var(--muted);text-align:center;
+  padding:.25rem;
+  background:rgba(28,36,53,.8);
+  border-radius:2px;
+}
+.grid-row{
+  display:grid;
+  grid-template-columns:40px repeat(6, 1fr);
+  gap:2px;margin-bottom:2px;
+}
+.row-num{
+  font-family:var(--font-mono);font-size:.65rem;
+  color:var(--muted);text-align:center;
+  padding:.25rem;
+  background:rgba(28,36,53,.8);
+  border-radius:2px;
+}
+.cell{
+  font-family:var(--font-mono);font-size:.65rem;
+  padding:.3rem .4rem;
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.05);
+  border-radius:2px;
+  transition:background .3s;
+  white-space:nowrap;overflow:hidden;
+}
+.cell.highlighted{
+  background:rgba(99,210,140,.15);
+  border-color:rgba(99,210,140,.4);
+  color:var(--accent);
+}
+.cell.formula{color:var(--accent2)}
+.cell.number{color:var(--accent3);text-align:right}
+.mini-bar-wrap{
+  padding:.75rem;
+  border-top:1px solid var(--border);
+}
+.mini-bar-label{
+  font-family:var(--font-mono);font-size:.65rem;
+  color:var(--muted);margin-bottom:.5rem;
+}
+.mini-bars{display:flex;align-items:flex-end;gap:4px;height:50px}
+.mini-bar{
+  flex:1;background:var(--accent);
+  border-radius:2px 2px 0 0;
+  opacity:.7;
+  transition:height .5s var(--ease),opacity .3s;
+}
+.mini-bar:hover{opacity:1}
+
+/* ============================================================
+   FLOATING LABELS
+   ============================================================ */
+.float-label{
+  position:absolute;
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:.5rem .875rem;
+  font-family:var(--font-mono);font-size:.7rem;
+  color:var(--accent);
+  white-space:nowrap;
+  animation:floatLabel 4s ease-in-out infinite;
+  box-shadow:0 4px 24px rgba(0,0,0,.4);
+  pointer-events:none;
+}
+.fl-1{top:-20px;right:-20px;animation-delay:0s}
+.fl-2{bottom:40px;left:-30px;animation-delay:1.5s}
+.fl-3{top:40%;right:-40px;animation-delay:.8s}
+@keyframes floatLabel{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+
+/* ============================================================
+   SKILLS SECTION
+   ============================================================ */
+#skills{background:transparent}
+.skills-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:1.5rem;
+  margin-top:3rem;
+}
+.skill-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:1.75rem;
+  transition:transform .3s var(--ease),box-shadow .3s,border-color .3s;
+  cursor:default;
+  position:relative;
+  overflow:hidden;
+}
+.skill-card::before{
+  content:'';
+  position:absolute;inset:0;
+  background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(99,210,140,.1),transparent 60%);
+  opacity:0;transition:opacity .3s;
+  pointer-events:none;
+}
+.skill-card:hover::before{opacity:1}
+.skill-card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 16px 48px rgba(0,0,0,.4);
+  border-color:rgba(99,210,140,.4);
+}
+.skill-icon{
+  width:48px;height:48px;
+  border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:1rem;
+  font-size:1.5rem;
+}
+.si-green{background:rgba(99,210,140,.15)}
+.si-blue{background:rgba(59,130,246,.15)}
+.si-gold{background:rgba(245,158,11,.15)}
+.skill-name{
+  font-weight:600;font-size:1.05rem;
+  margin-bottom:.5rem;
+}
+.skill-desc{
+  font-size:.875rem;color:var(--muted);
+  line-height:1.65;
+  margin-bottom:1.25rem;
+}
+.skill-bar-wrap{
+  height:6px;
+  background:rgba(255,255,255,.08);
+  border-radius:3px;
+  overflow:hidden;
+}
+.skill-bar{
+  height:100%;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  border-radius:3px;
+  width:0;
+  transition:width 1.2s var(--ease);
+}
+.skill-pct{
+  font-family:var(--font-mono);font-size:.7rem;
+  color:var(--muted);margin-top:.375rem;
+  text-align:right;
+}
+
+/* ============================================================
+   SERVICES
+   ============================================================ */
+#services{background:var(--surface)}
+.services-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+  gap:2rem;
+  margin-top:3rem;
+}
+.service-card{
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:2.5rem;
+  position:relative;
+  overflow:hidden;
+  transition:transform .3s var(--ease),box-shadow .3s;
+}
+.service-card:hover{
+  transform:translateY(-6px);
+  box-shadow:0 24px 64px rgba(0,0,0,.5);
+}
+.service-card .accent-line{
+  position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+}
+.service-number{
+  font-family:var(--font-mono);
+  font-size:3rem;font-weight:300;
+  color:rgba(99,210,140,.2);
+  line-height:1;
+  margin-bottom:1rem;
+}
+.service-title{
+  font-size:1.25rem;font-weight:700;
+  margin-bottom:.75rem;
+}
+.service-desc{
+  color:var(--muted);font-size:.9rem;
+  line-height:1.7;
+  margin-bottom:1.5rem;
+}
+.service-tags{display:flex;flex-wrap:wrap;gap:.5rem}
+.tag{
+  font-family:var(--font-mono);font-size:.7rem;
+  padding:.25rem .75rem;
+  border-radius:100px;
+  background:rgba(99,210,140,.1);
+  border:1px solid rgba(99,210,140,.2);
+  color:var(--accent);
+}
+.tag-blue{background:rgba(59,130,246,.1);border-color:rgba(59,130,246,.2);color:var(--accent2)}
+.tag-gold{background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.2);color:var(--accent3)}
+
+/* ============================================================
+   DATA VISUALISATION SECTION
+   ============================================================ */
+#visualisation{background:transparent}
+.viz-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:2rem;
+  margin-top:3rem;
+}
+.viz-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
+  overflow:hidden;
+}
+.viz-card-header{
+  padding:1.25rem 1.5rem;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.viz-card-title{font-weight:600;font-size:.95rem}
+.viz-card-sub{font-family:var(--font-mono);font-size:.7rem;color:var(--muted)}
+.viz-body{padding:1.5rem}
+
+/* Bar Chart */
+.bar-chart{display:flex;gap:.75rem;align-items:flex-end;height:160px}
+.bar-col{
+  flex:1;
+  display:flex;flex-direction:column;align-items:center;
+  gap:.5rem;
+  height:100%;
+  justify-content:flex-end;
+}
+.bar-segment{
+  width:100%;border-radius:4px 4px 0 0;
+  transition:height 1.5s var(--ease);
+  position:relative;
+  cursor:pointer;
+}
+.bar-segment:hover::after{
+  content:attr(data-val);
+  position:absolute;top:-24px;left:50%;
+  transform:translateX(-50%);
+  font-family:var(--font-mono);font-size:.65rem;
+  color:var(--accent);
+  background:var(--surface2);
+  border:1px solid var(--border);
+  padding:.1rem .4rem;border-radius:3px;
+  white-space:nowrap;
+}
+.bar-label{font-family:var(--font-mono);font-size:.6rem;color:var(--muted);text-align:center}
+
+/* Donut Chart */
+#donut-svg{display:block;margin:0 auto}
+.donut-legend{
+  display:flex;flex-wrap:wrap;gap:.75rem;
+  margin-top:1rem;justify-content:center;
+}
+.legend-item{
+  display:flex;align-items:center;gap:.4rem;
+  font-size:.75rem;color:var(--muted);
+}
+.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* Sparklines */
+.sparkline-row{
+  display:flex;align-items:center;
+  padding:.75rem 0;
+  border-bottom:1px solid var(--border);
+  gap:1rem;
+}
+.sparkline-row:last-child{border-bottom:none}
+.sl-label{font-size:.8rem;flex:0 0 100px}
+.sl-value{
+  font-family:var(--font-mono);font-size:.8rem;
+  color:var(--accent);
+  flex:0 0 60px;text-align:right;
+}
+.sl-change{
+  font-family:var(--font-mono);font-size:.7rem;
+  flex:0 0 50px;text-align:right;
+}
+.pos{color:#4ADE80}.neg{color:#F87171}
+.sl-canvas-wrap{flex:1}
+
+/* Heatmap */
+.heatmap{
+  display:grid;
+  grid-template-columns:60px repeat(7,1fr);
+  gap:3px;
+}
+.hm-cell{
+  height:22px;
+  border-radius:3px;
+  transition:transform .2s;
+  cursor:pointer;
+  position:relative;
+}
+.hm-cell:hover{transform:scale(1.3);z-index:2}
+.hm-cell:hover::after{
+  content:attr(data-tip);
+  position:absolute;bottom:calc(100% + 4px);left:50%;
+  transform:translateX(-50%);
+  background:var(--surface2);
+  border:1px solid var(--border);
+  font-family:var(--font-mono);font-size:.6rem;
+  color:var(--text);
+  padding:.2rem .4rem;border-radius:3px;
+  white-space:nowrap;
+  pointer-events:none;
+  z-index:10;
+}
+.hm-label{
+  font-family:var(--font-mono);font-size:.6rem;
+  color:var(--muted);display:flex;align-items:center;
+}
+.hm-col-head{
+  font-family:var(--font-mono);font-size:.6rem;
+  color:var(--muted);text-align:center;
+  padding-bottom:4px;
+}
+
+/* ============================================================
+   TOOLS WHEEL
+   ============================================================ */
+#tools{background:var(--surface)}
+.tools-layout{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:4rem;align-items:center;
+  margin-top:3rem;
+}
+#tools-svg-wrap{position:relative;width:100%;padding-bottom:100%;max-width:400px;margin:0 auto}
+#tools-svg{position:absolute;inset:0;width:100%;height:100%}
+.tools-list{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:1rem;
+}
+.tool-item{
+  display:flex;align-items:flex-start;gap:.75rem;
+  padding:1rem;
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:10px;
+  transition:border-color .2s;
+  cursor:default;
+}
+.tool-item:hover{border-color:rgba(99,210,140,.4)}
+.tool-icon{font-size:1.25rem;flex-shrink:0;line-height:1}
+.tool-text strong{display:block;font-size:.85rem;margin-bottom:.2rem}
+.tool-text span{font-size:.75rem;color:var(--muted)}
+
+/* ============================================================
+   WORK MODES (Employee vs Freelancer)
+   ============================================================ */
+#work-modes{background:transparent}
+.modes-grid{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:2rem;margin-top:3rem;
+}
+.mode-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:2.5rem;
+  position:relative;overflow:hidden;
+}
+.mode-card::after{
+  content:'';
+  position:absolute;
+  width:200px;height:200px;
+  border-radius:50%;
+  top:-60px;right:-60px;
+  filter:blur(60px);
+  pointer-events:none;
+}
+.mode-employee::after{background:rgba(99,210,140,.12)}
+.mode-freelancer::after{background:rgba(59,130,246,.12)}
+.mode-badge{
+  display:inline-flex;align-items:center;gap:.5rem;
+  font-family:var(--font-mono);font-size:.7rem;
+  padding:.3rem .875rem;
+  border-radius:100px;
+  margin-bottom:1.5rem;
+  letter-spacing:.1em;
+}
+.badge-emp{background:rgba(99,210,140,.12);border:1px solid rgba(99,210,140,.3);color:var(--accent)}
+.badge-free{background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);color:var(--accent2)}
+.mode-title{font-size:1.5rem;font-weight:700;margin-bottom:.75rem}
+.mode-desc{color:var(--muted);font-size:.9rem;line-height:1.7;margin-bottom:2rem}
+.mode-features{list-style:none;display:flex;flex-direction:column;gap:.625rem}
+.mode-features li{
+  display:flex;align-items:center;gap:.625rem;
+  font-size:.875rem;
+}
+.mode-features li::before{
+  content:'✓';
+  width:20px;height:20px;
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.65rem;font-weight:700;
+  flex-shrink:0;
+}
+.mode-employee .mode-features li::before{
+  background:rgba(99,210,140,.2);
+  color:var(--accent);
+}
+.mode-freelancer .mode-features li::before{
+  background:rgba(59,130,246,.2);
+  color:var(--accent2);
+}
+
+/* ============================================================
+   PROCESS TIMELINE
+   ============================================================ */
+#process{background:var(--surface)}
+.timeline{
+  position:relative;
+  margin-top:3rem;
+  padding-left:2rem;
+}
+.timeline::before{
+  content:'';
+  position:absolute;left:0;top:0;bottom:0;
+  width:2px;
+  background:linear-gradient(180deg,var(--accent),var(--accent2),transparent);
+}
+.timeline-item{
+  position:relative;
+  padding-left:2.5rem;
+  margin-bottom:3rem;
+  opacity:0;
+  transform:translateX(-20px);
+  transition:opacity .6s var(--ease),transform .6s var(--ease);
+}
+.timeline-item.visible{opacity:1;transform:translateX(0)}
+.timeline-dot{
+  position:absolute;left:-2.125rem;top:.25rem;
+  width:18px;height:18px;
+  border-radius:50%;
+  border:2px solid var(--accent);
+  background:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+}
+.timeline-dot::after{
+  content:'';
+  width:6px;height:6px;
+  border-radius:50%;
+  background:var(--accent);
+}
+.timeline-step{
+  font-family:var(--font-mono);font-size:.7rem;
+  color:var(--accent);margin-bottom:.5rem;
+  letter-spacing:.1em;
+}
+.timeline-heading{font-size:1.1rem;font-weight:700;margin-bottom:.5rem}
+.timeline-body{color:var(--muted);font-size:.875rem;line-height:1.7}
+
+/* ============================================================
+   CONTACT
+   ============================================================ */
+#contact{background:transparent}
+.contact-inner{
+  max-width:680px;margin:0 auto;
+  text-align:center;
+}
+.contact-grid{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:1.5rem;margin-top:2.5rem;text-align:left;
+}
+.contact-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:2rem;
+  display:flex;flex-direction:column;
+  align-items:flex-start;
+  gap:1rem;
+  transition:transform .3s var(--ease),box-shadow .3s,border-color .3s;
+  cursor:pointer;
+  text-decoration:none;
+  color:inherit;
+}
+.contact-card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 16px 48px rgba(0,0,0,.4);
+}
+.cc-whatsapp:hover{border-color:rgba(37,211,102,.5)}
+.cc-email:hover{border-color:rgba(234,67,53,.4)}
+.contact-icon{
+  width:52px;height:52px;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.75rem;
+}
+.ci-wa{background:rgba(37,211,102,.15)}
+.ci-em{background:rgba(234,67,53,.15)}
+.contact-method{font-weight:700;font-size:1rem;margin-bottom:.25rem}
+.contact-value{
+  font-family:var(--font-mono);font-size:.85rem;
+  color:var(--accent);word-break:break-all;
+}
+.contact-hint{font-size:.8rem;color:var(--muted)}
+.availability-badge{
+  display:inline-flex;align-items:center;gap:.5rem;
+  background:rgba(99,210,140,.1);
+  border:1px solid rgba(99,210,140,.2);
+  border-radius:100px;
+  padding:.5rem 1.25rem;
+  font-size:.85rem;
+  color:var(--accent);
+  margin:2rem auto 0;
+}
+.avail-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:var(--accent);
+  animation:pulse 2s ease-in-out infinite;
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+footer{
+  background:var(--surface);
+  border-top:1px solid var(--border);
+  padding:2.5rem 4vw;
+  position:relative;z-index:1;
+}
+.footer-inner{
+  max-width:1200px;margin:0 auto;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:1rem;
+}
+.footer-brand{
+  font-family:var(--font-mono);
+  font-size:.85rem;color:var(--muted);
+}
+.footer-brand span{color:var(--accent)}
+.footer-links{display:flex;gap:1.5rem}
+.footer-links a{font-size:.8rem;color:var(--muted);transition:color .2s}
+.footer-links a:hover{color:var(--accent)}
+
+/* ============================================================
+   SCROLL ANIMATIONS
+   ============================================================ */
+.fade-in{
+  opacity:0;transform:translateY(24px);
+  transition:opacity .7s var(--ease),transform .7s var(--ease);
+}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media(max-width:900px){
+  .hero-inner,
+  .viz-grid,
+  .tools-layout,
+  .modes-grid,
+  .contact-grid{grid-template-columns:1fr}
+  .hero-visual{margin-top:3rem}
+  .fl-1,.fl-2,.fl-3{display:none}
+}
+@media(max-width:600px){
+  .nav-links{display:none}
+  .hero-stats{gap:1.5rem}
+  .stat-num{font-size:1.5rem}
+  .bar-chart{gap:.4rem}
+  .heatmap{grid-template-columns:40px repeat(7,1fr)}
+}
+/* Reduced motion */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+
+<!-- Backgrounds -->
+<div id="grid-bg"></div>
+<canvas id="particle-canvas"></canvas>
+
+<!-- ===================== NAV ===================== -->
+<nav id="main-nav">
+  <div class="nav-logo">G<span>.</span>Excel</div>
+  <ul class="nav-links">
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#visualisation">Data</a></li>
+    <li><a href="#work-modes">Work Modes</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <a href="#contact" class="nav-cta">Hire Me</a>
+</nav>
+
+<!-- ===================== HERO ===================== -->
+<section id="hero">
+  <div class="hero-inner">
+
+    <!-- LEFT -->
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="badge-dot"></span>
+        Available for Hire · Full-Time &amp; Freelance
+      </div>
+      <h1 class="hero-title">
+        <span class="line1">Ganesh</span>
+        <span class="line2">Excel Mastery</span>
+        <span class="line3">Data Entry Executive</span>
+      </h1>
+      <p class="hero-desc">
+        Turning raw data into actionable clarity — spreadsheets, automation, reporting &amp; beyond.
+        Trusted across corporate floors and freelance projects.
+      </p>
+      <div class="hero-actions">
+        <a href="#contact" class="btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Get in Touch
+        </a>
+        <a href="#skills" class="btn-secondary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l9-9 9 9"/><path d="M9 21V9h6v12"/></svg>
+          View Skills
+        </a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-item">
+          <span class="stat-num" data-count="5">0</span>
+          <span class="stat-label">Years Exp.</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-num" data-count="200">0</span>
+          <span class="stat-label">Projects Done</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-num" data-count="98">0</span>
+          <span class="stat-label">% Accuracy</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT — EXCEL WINDOW -->
+    <div class="hero-visual">
+      <div class="float-label fl-1">⚡ VLOOKUP • INDEX/MATCH</div>
+      <div class="float-label fl-2">📊 Pivot Tables Active</div>
+      <div class="float-label fl-3">✅ 98% Accuracy</div>
+
+      <div class="excel-window">
+        <div class="excel-titlebar">
+          <div class="traffic-dot td-red"></div>
+          <div class="traffic-dot td-yellow"></div>
+          <div class="traffic-dot td-green"></div>
+          <span class="excel-filename">Ganesh_DataMaster_2026.xlsx</span>
+        </div>
+        <div class="excel-ribbon">
+          <span class="ribbon-item active">Home</span>
+          <span class="ribbon-item">Insert</span>
+          <span class="ribbon-item">Formulas</span>
+          <span class="ribbon-item">Data</span>
+          <span class="ribbon-item">Review</span>
+        </div>
+        <div class="excel-grid">
+          <div class="grid-header">
+            <div class="cell-head"></div>
+            <div class="cell-head">A</div>
+            <div class="cell-head">B</div>
+            <div class="cell-head">C</div>
+            <div class="cell-head">D</div>
+            <div class="cell-head">E</div>
+            <div class="cell-head">F</div>
+          </div>
+          <!-- rows injected by JS -->
+          <div id="excel-rows"></div>
+        </div>
+        <div class="mini-bar-wrap">
+          <div class="mini-bar-label">Monthly Output ↑</div>
+          <div class="mini-bars" id="mini-bars"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== SKILLS ===================== -->
+<section id="skills" class="section">
+  <div class="section-inner">
+    <p class="eyebrow fade-in">What I Know</p>
+    <h2 class="section-title fade-in">Excel <span>Skills Arsenal</span></h2>
+    <div class="divider fade-in"></div>
+    <div class="skills-grid" id="skills-grid"></div>
+  </div>
+</section>
+
+<!-- ===================== DATA VIZ ===================== -->
+<section id="visualisation" class="section">
+  <div class="section-inner">
+    <p class="eyebrow fade-in">Data At a Glance</p>
+    <h2 class="section-title fade-in">Live <span>Visualisations</span></h2>
+    <div class="divider fade-in"></div>
+    <div class="viz-grid">
+      <!-- Bar Chart -->
+      <div class="viz-card fade-in">
+        <div class="viz-card-header">
+          <div class="viz-card-title">Monthly Data Volume</div>
+          <div class="viz-card-sub">Records Processed (thousands)</div>
+        </div>
+        <div class="viz-body">
+          <div class="bar-chart" id="bar-chart"></div>
+        </div>
+      </div>
+
+      <!-- Donut -->
+      <div class="viz-card fade-in">
+        <div class="viz-card-header">
+          <div class="viz-card-title">Task Breakdown</div>
+          <div class="viz-card-sub">Work Distribution %</div>
+        </div>
+        <div class="viz-body">
+          <svg id="donut-svg" viewBox="0 0 180 180" width="180" height="180"></svg>
+          <div class="donut-legend" id="donut-legend"></div>
+        </div>
+      </div>
+
+      <!-- Sparklines -->
+      <div class="viz-card fade-in">
+        <div class="viz-card-header">
+          <div class="viz-card-title">Performance Metrics</div>
+          <div class="viz-card-sub">vs Previous Month</div>
+        </div>
+        <div class="viz-body" id="sparklines-wrap"></div>
+      </div>
+
+      <!-- Heatmap -->
+      <div class="viz-card fade-in">
+        <div class="viz-card-header">
+          <div class="viz-card-title">Work Intensity Heatmap</div>
+          <div class="viz-card-sub">Entries per Day · Last 4 Weeks</div>
+        </div>
+        <div class="viz-body">
+          <div class="heatmap" id="heatmap"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== SERVICES ===================== -->
+<section id="services" class="section">
+  <div class="section-inner">
+    <p class="eyebrow fade-in">What I Offer</p>
+    <h2 class="section-title fade-in">Professional <span>Services</span></h2>
+    <div class="divider fade-in"></div>
+    <div class="services-grid" id="services-grid"></div>
+  </div>
+</section>
+
+<!-- ===================== TOOLS ===================== -->
+<section id="tools" class="section">
+  <div class="section-inner">
+    <p class="eyebrow fade-in">My Toolkit</p>
+    <h2 class="section-title fade-in">Tools &amp; <span>Technologies</span></h2>
+    <div class="divider fade-in"></div>
+    <div class="tools-layout">
+      <div id="tools-svg-wrap">
+        <svg id="tools-svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+      <div class="tools-list" id="tools-list"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== WORK MODES ===================== -->
+<section id="work-modes" class="section">
+  <div class="section-inner">
+    <p class="eyebrow fade-in">Flexible Engagement</p>
+    <h2 class="section-title fade-in">Employee &amp; <span>Freelancer</span></h2>
+    <div class="divider fade-in"></div>
+    <div class="modes-grid">
+      <div class="mode-card mode-employee fade-in">
+        <div class="mode-badge badge-emp">📋 Full-Time Employee</div>
+        <h3 class="mode-title">Corporate Excellence</h3>
+        <p class="mode-desc">
+          Dedicated, reliable, and consistent. As an in-house Data Entry Executive I bring
+          structured reporting, daily accuracy, and team collaboration to enterprise operations.
+        </p>
+        <ul class="mode-features">
+          <li>Daily/weekly data entry & cleansing</li>
+          <li>Automated Excel dashboards for management</li>
+          <li>Cross-department data coordination</li>
+          <li>MIS reporting & KPI tracking</li>
+          <li>Error-free record maintenance</li>
+          <li>Deadline-driven delivery</li>
+        </ul>
+      </div>
+      <div class="mode-card mode-freelancer fade-in">
+        <div class="mode-badge badge-free">🚀 Freelance Consultant</div>
+        <h3 class="mode-title">Flexible Excellence</h3>
+        <p class="mode-desc">
+          Available for project-based engagements of any scale — from one-time spreadsheet
+          overhauls to ongoing monthly data management retainers.
+        </p>
+        <ul class="mode-features">
+          <li>One-time data clean-up & restructuring</li>
+          <li>Custom Excel templates & macros</li>
+          <li>Invoice & billing spreadsheet systems</li>
+          <li>Remote-friendly, fast turnaround</li>
+          <li>Competitive rates, transparent billing</li>
+          <li>Ongoing retainer packages available</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== PROCESS ===================== -->
+<section id="process" class="section">
+  <div class="section-inner">
+    <p class="eyebrow fade-in">How It Works</p>
+    <h2 class="section-title fade-in">Work <span>Process</span></h2>
+    <div class="divider fade-in"></div>
+    <div class="timeline" id="timeline"></div>
+  </div>
+</section>
+
+<!-- ===================== CONTACT ===================== -->
+<section id="contact" class="section">
+  <div class="section-inner">
+    <div class="contact-inner">
+      <p class="eyebrow fade-in" style="text-align:center">Reach Out</p>
+      <h2 class="section-title fade-in" style="text-align:center">Let's <span>Connect</span></h2>
+      <div class="divider fade-in" style="margin:0 auto 2rem"></div>
+      <p class="fade-in" style="color:var(--muted);font-size:1rem;line-height:1.8;text-align:center">
+        Whether you need a full-time data entry professional or a freelance Excel expert —
+        I'm one message away. Let's build something accurate, efficient and beautiful.
+      </p>
+      <div class="contact-grid">
+        <a href="https://wa.me/919217679129" target="_blank" class="contact-card cc-whatsapp fade-in">
+          <div class="contact-icon ci-wa">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.125.554 4.122 1.523 5.855L.063 23.5l5.803-1.438A11.946 11.946 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm.002 22.001a9.96 9.96 0 0 1-5.078-1.394l-.364-.216-3.773.934.979-3.666-.237-.376A9.963 9.963 0 0 1 2.004 12C2.004 6.479 6.481 2 12.002 2c5.521 0 9.998 4.479 9.998 10 0 5.521-4.477 10-9.998 10z"/></svg>
+          </div>
+          <div>
+            <div class="contact-method">WhatsApp</div>
+            <div class="contact-value">+91 9217679129</div>
+            <div class="contact-hint">Chat · Voice · File sharing</div>
+          </div>
+        </a>
+        <a href="mailto:jeevan.lok.hai@gmail.com" class="contact-card cc-email fade-in">
+          <div class="contact-icon ci-em">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#EA4335" stroke-width="1.8"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>
+          </div>
+          <div>
+            <div class="contact-method">Email</div>
+            <div class="contact-value">jeevan.lok.hai<br>@gmail.com</div>
+            <div class="contact-hint">Detailed proposals & briefs</div>
+          </div>
+        </a>
+      </div>
+      <div class="availability-badge fade-in">
+        <span class="avail-dot"></span>
+        Currently Open for Opportunities
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== FOOTER ===================== -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      Built by <span>Ganesh</span> · Excel Mastery &amp; Data Entry Executive
+    </div>
+    <div class="footer-links">
+      <a href="https://wa.me/919217679129" target="_blank">WhatsApp</a>
+      <a href="mailto:jeevan.lok.hai@gmail.com">Email</a>
+      <a href="#hero">Back to Top ↑</a>
+    </div>
+  </div>
+</footer>
+
+<!-- ===================== JAVASCRIPT ===================== -->
+<script>
+/* ======================================================
+   PARTICLES
+====================================================== */
+(function(){
+  const canvas = document.getElementById('particle-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, particles = [];
+  const COUNT = 80;
+  const ACCENT = '#63D28C';
+  const ACCENT2 = '#3B82F6';
+
+  function resize(){
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  class Particle{
+    constructor(){this.reset()}
+    reset(){
+      this.x = Math.random()*W;
+      this.y = Math.random()*H;
+      this.r = Math.random()*1.5+.5;
+      this.vx = (Math.random()-.5)*.4;
+      this.vy = (Math.random()-.5)*.4;
+      this.alpha = Math.random()*.5+.1;
+      this.color = Math.random()>.5?ACCENT:ACCENT2;
+    }
+    update(){
+      this.x += this.vx; this.y += this.vy;
+      if(this.x<0||this.x>W||this.y<0||this.y>H) this.reset();
+    }
+    draw(){
+      ctx.beginPath();
+      ctx.arc(this.x,this.y,this.r,0,Math.PI*2);
+      ctx.fillStyle=this.color;
+      ctx.globalAlpha=this.alpha;
+      ctx.fill();
+      ctx.globalAlpha=1;
+    }
+  }
+
+  for(let i=0;i<COUNT;i++) particles.push(new Particle());
+
+  function connectParticles(){
+    for(let i=0;i<particles.length;i++){
+      for(let j=i+1;j<particles.length;j++){
+        const d=Math.hypot(particles[i].x-particles[j].x,particles[i].y-particles[j].y);
+        if(d<100){
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x,particles[i].y);
+          ctx.lineTo(particles[j].x,particles[j].y);
+          ctx.strokeStyle=ACCENT;
+          ctx.globalAlpha=(1-d/100)*.12;
+          ctx.lineWidth=.5;
+          ctx.stroke();
+          ctx.globalAlpha=1;
+        }
+      }
+    }
+  }
+
+  function loop(){
+    ctx.clearRect(0,0,W,H);
+    particles.forEach(p=>{p.update();p.draw()});
+    connectParticles();
+    requestAnimationFrame(loop);
+  }
+  loop();
+})();
+
+/* ======================================================
+   NAV SCROLL EFFECT
+====================================================== */
+const nav = document.getElementById('main-nav');
+window.addEventListener('scroll',()=>{
+  nav.classList.toggle('scrolled', window.scrollY>50);
+});
+
+/* ======================================================
+   INTERSECTION OBSERVER (fade-in + skill bars + timeline)
+====================================================== */
+const observer = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      entry.target.classList.add('visible');
+      // skill bars
+      const bar = entry.target.querySelector('.skill-bar');
+      if(bar) bar.style.width = bar.dataset.pct+'%';
+      observer.unobserve(entry.target);
+    }
+  });
+},{threshold:.15});
+
+function observe(el){ observer.observe(el) }
+
+/* ======================================================
+   COUNTER ANIMATION
+====================================================== */
+function animateCounter(el, end, suffix=''){
+  let start=0;
+  const duration=1800;
+  const step = timestamp=>{
+    if(!start) start=timestamp;
+    const progress=Math.min((timestamp-start)/duration,1);
+    const eased=1-Math.pow(1-progress,4);
+    el.textContent=Math.round(eased*end)+(suffix||'');
+    if(progress<1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+const heroObserver=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      document.querySelectorAll('.stat-num[data-count]').forEach(el=>{
+        const v=parseInt(el.dataset.count);
+        const suf = el.textContent.includes('+') ? '+' : el.textContent.includes('%') ? '%' : '';
+        el.dataset.suf = v===98?'%':v===200?'+':'';
+        animateCounter(el, v, el.dataset.suf||'');
+      });
+      heroObserver.disconnect();
+    }
+  });
+},{threshold:.3});
+heroObserver.observe(document.getElementById('hero'));
+
+/* ======================================================
+   EXCEL ROWS (animated typewriter)
+====================================================== */
+const excelData = [
+  ['Employee','Data Entry','Jan 2026','₹28,000','98.2%','✓'],
+  ['Freelance','VLOOKUP','Feb 2026','₹12,500','99.1%','✓'],
+  ['=SUM(B2:B10)','Pivot','Mar 2026','₹31,000','97.8%','✓'],
+  ['Dashboard','INDEX','Apr 2026','₹9,800','99.5%','✓'],
+  ['Automation','MATCH','May 2026','₹15,200','98.7%','✓'],
+];
+const container=document.getElementById('excel-rows');
+excelData.forEach((row,ri)=>{
+  const div=document.createElement('div');
+  div.className='grid-row';
+  const numCell=document.createElement('div');
+  numCell.className='row-num';numCell.textContent=ri+1;
+  div.appendChild(numCell);
+  row.forEach((val,ci)=>{
+    const cell=document.createElement('div');
+    let cls='cell';
+    if(val.startsWith('=')) cls+=' formula';
+    else if(/^\d/.test(val)||val.startsWith('₹')) cls+=' number';
+    else if(val==='✓') cls+=' highlighted';
+    cell.className=cls;
+    cell.textContent='';
+    div.appendChild(cell);
+    // typewriter
+    setTimeout(()=>{
+      let i=0;
+      const iv=setInterval(()=>{
+        cell.textContent=val.slice(0,++i);
+        if(i>=val.length) clearInterval(iv);
+      },30);
+    },ri*400+ci*60);
+  });
+  container.appendChild(div);
+});
+
+// Mini bars
+const miniBarData=[45,62,78,55,88,71,95];
+const mbContainer=document.getElementById('mini-bars');
+const maxMB=Math.max(...miniBarData);
+miniBarData.forEach((v,i)=>{
+  const bar=document.createElement('div');
+  bar.className='mini-bar';
+  bar.style.height='0%';
+  bar.style.background=`hsl(${140+i*10},60%,${55+i*3}%)`;
+  mbContainer.appendChild(bar);
+  setTimeout(()=>{ bar.style.height=(v/maxMB*100)+'%'; },500+i*100);
+});
+
+/* ======================================================
+   SKILLS DATA
+====================================================== */
+const skillsData=[
+  {icon:'📊',cls:'si-green',name:'Pivot Tables',desc:'Summarise millions of rows in seconds. Dynamic slicers, calculated fields & grouped hierarchies.',pct:95},
+  {icon:'🔎',cls:'si-blue',name:'VLOOKUP / INDEX-MATCH',desc:'Advanced lookup formulas for cross-sheet data retrieval with near-zero error rates.',pct:97},
+  {icon:'⚡',cls:'si-gold',name:'Macros & VBA',desc:'Automate repetitive data entry tasks with recorded macros and custom VBA scripts.',pct:82},
+  {icon:'📈',cls:'si-green',name:'Charts & Dashboards',desc:'Interactive, executive-ready dashboards with dynamic charts, slicers and KPI cards.',pct:90},
+  {icon:'🧹',cls:'si-blue',name:'Data Cleansing',desc:'Deduplication, standardisation, text-to-columns, TRIM/CLEAN and power-query transforms.',pct:96},
+  {icon:'🔐',cls:'si-gold',name:'Data Validation',desc:'Drop-downs, dependent lists, input restrictions and conditional error alerts.',pct:93},
+  {icon:'📋',cls:'si-green',name:'MIS Reporting',desc:'Monthly information system reports with automated calculations, comparisons & trends.',pct:91},
+  {icon:'🏆',cls:'si-blue',name:'Conditional Formatting',desc:'Heat-map style tables, icon sets, data bars and rule-based colour coding.',pct:98},
+];
+
+const sg=document.getElementById('skills-grid');
+skillsData.forEach(s=>{
+  const card=document.createElement('div');
+  card.className='skill-card fade-in';
+  card.innerHTML=`
+    <div class="skill-icon ${s.cls}">${s.icon}</div>
+    <div class="skill-name">${s.name}</div>
+    <div class="skill-desc">${s.desc}</div>
+    <div class="skill-bar-wrap"><div class="skill-bar" data-pct="${s.pct}"></div></div>
+    <div class="skill-pct">${s.pct}% proficiency</div>
+  `;
+  // Magnetic tilt
+  card.addEventListener('mousemove',e=>{
+    const r=card.getBoundingClientRect();
+    const x=(e.clientX-r.left)/r.width;
+    const y=(e.clientY-r.top)/r.height;
+    card.style.transform=`translateY(-4px) rotateX(${(y-.5)*-8}deg) rotateY(${(x-.5)*8}deg)`;
+    card.style.setProperty('--mx',x*100+'%');
+    card.style.setProperty('--my',y*100+'%');
+  });
+  card.addEventListener('mouseleave',()=>{card.style.transform=''});
+  sg.appendChild(card);
+  observe(card);
+});
+
+/* ======================================================
+   SERVICES DATA
+====================================================== */
+const servicesData=[
+  {n:'01',title:'Data Entry & Management',desc:'Fast, accurate entry of structured data from any source — forms, PDFs, scans, web — into clean, organised Excel sheets.',tags:['Data Entry','Validation','Formatting'],type:['green','green','blue']},
+  {n:'02',title:'Excel Automation & Macros',desc:'Eliminate repetitive manual tasks with custom VBA macros and Power Query workflows that run with a single click.',tags:['VBA','Power Query','Automation'],type:['blue','blue','gold']},
+  {n:'03',title:'Dashboard & Report Design',desc:'Executive-ready interactive dashboards that pull live data, highlight KPIs and visualise trends at a glance.',tags:['Dashboard','KPIs','Charts'],type:['green','green','gold']},
+  {n:'04',title:'Data Cleansing & Migration',desc:'Remove duplicates, fix inconsistencies, standardise formats and safely migrate datasets between systems.',tags:['Deduplication','Cleaning','Migration'],type:['blue','green','gold']},
+  {n:'05',title:'Formula & Function Audit',desc:'Review, fix and optimise complex formula chains — SUMIFS, array formulas, nested IFs and dynamic arrays.',tags:['SUMIFS','Array','Dynamic'],type:['green','gold','blue']},
+  {n:'06',title:'MIS & Inventory Reports',desc:'Monthly information system reports, stock-tracking sheets and reconciliation files for finance and operations teams.',tags:['MIS','Inventory','Finance'],type:['gold','blue','green']},
+];
+
+const svcGrid=document.getElementById('services-grid');
+servicesData.forEach(s=>{
+  const card=document.createElement('div');
+  card.className='service-card fade-in';
+  const tagsHTML=s.tags.map((t,i)=>`<span class="tag tag-${s.type[i]}">${t}</span>`).join('');
+  card.innerHTML=`
+    <div class="accent-line"></div>
+    <div class="service-number">${s.n}</div>
+    <div class="service-title">${s.title}</div>
+    <div class="service-desc">${s.desc}</div>
+    <div class="service-tags">${tagsHTML}</div>
+  `;
+  svcGrid.appendChild(card);
+  observe(card);
+});
+
+/* ======================================================
+   BAR CHART
+====================================================== */
+const months=['Jan','Feb','Mar','Apr','May','Jun'];
+const barValues=[62,78,55,91,84,97];
+const maxBar=Math.max(...barValues);
+const barColors=['#63D28C','#3B82F6','#F59E0B','#63D28C','#3B82F6','#63D28C'];
+const barChart=document.getElementById('bar-chart');
+months.forEach((m,i)=>{
+  const col=document.createElement('div');col.className='bar-col';
+  const seg=document.createElement('div');
+  seg.className='bar-segment';
+  seg.style.height='0px';
+  seg.style.background=barColors[i];
+  seg.style.transition=`height 1.2s cubic-bezier(.23,1,.32,1) ${i*0.1}s`;
+  seg.dataset.val=barValues[i]+'k';
+  const lbl=document.createElement('div');lbl.className='bar-label';lbl.textContent=m;
+  col.appendChild(seg);col.appendChild(lbl);
+  barChart.appendChild(col);
+  // animate on view
+  setTimeout(()=>{
+    const maxH=140;
+    seg.style.height=(barValues[i]/maxBar*maxH)+'px';
+  },600);
+});
+
+/* ======================================================
+   DONUT CHART (SVG)
+====================================================== */
+const donutData=[
+  {label:'Data Entry',value:35,color:'#63D28C'},
+  {label:'Formulas',value:25,color:'#3B82F6'},
+  {label:'Dashboards',value:20,color:'#F59E0B'},
+  {label:'Automation',value:12,color:'#A78BFA'},
+  {label:'Cleaning',value:8,color:'#F472B6'},
+];
+const svg=document.getElementById('donut-svg');
+const cx=90,cy=90,R=70,r=45;
+let startAngle=-Math.PI/2;
+const total=donutData.reduce((a,b)=>a+b.value,0);
+
+donutData.forEach((d,i)=>{
+  const angle=(d.value/total)*Math.PI*2;
+  const endAngle=startAngle+angle;
+  const x1=cx+R*Math.cos(startAngle), y1=cy+R*Math.sin(startAngle);
+  const x2=cx+R*Math.cos(endAngle),   y2=cy+R*Math.sin(endAngle);
+  const ix1=cx+r*Math.cos(startAngle),iy1=cy+r*Math.sin(startAngle);
+  const ix2=cx+r*Math.cos(endAngle),  iy2=cy+r*Math.sin(endAngle);
+  const large=angle>Math.PI?1:0;
+  const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+  path.setAttribute('d',`M${x1} ${y1} A${R} ${R} 0 ${large} 1 ${x2} ${y2} L${ix2} ${iy2} A${r} ${r} 0 ${large} 0 ${ix1} ${iy1} Z`);
+  path.setAttribute('fill',d.color);
+  path.setAttribute('opacity','0.85');
+  path.style.cursor='pointer';
+  path.style.transition='transform .2s, opacity .2s';
+  path.addEventListener('mouseenter',()=>{ path.setAttribute('opacity','1'); path.style.transform=`scale(1.05)`;path.style.transformOrigin=`${cx}px ${cy}px`; });
+  path.addEventListener('mouseleave',()=>{ path.setAttribute('opacity','0.85'); path.style.transform=''; });
+  svg.appendChild(path);
+
+  // percentage label
+  const midAngle=startAngle+angle/2;
+  const lx=cx+(R+r)/2*Math.cos(midAngle);
+  const ly=cy+(R+r)/2*Math.sin(midAngle);
+  if(d.value>10){
+    const text=document.createElementNS('http://www.w3.org/2000/svg','text');
+    text.setAttribute('x',lx);text.setAttribute('y',ly);
+    text.setAttribute('text-anchor','middle');text.setAttribute('dominant-baseline','middle');
+    text.setAttribute('font-size','9');text.setAttribute('fill','#000');
+    text.setAttribute('font-weight','700');text.setAttribute('font-family','JetBrains Mono, monospace');
+    text.textContent=d.value+'%';
+    svg.appendChild(text);
+  }
+  startAngle=endAngle;
+});
+
+// Centre label
+const cText=document.createElementNS('http://www.w3.org/2000/svg','text');
+cText.setAttribute('x',cx);cText.setAttribute('y',cy-6);
+cText.setAttribute('text-anchor','middle');cText.setAttribute('font-size','11');
+cText.setAttribute('fill','#E8EDF5');cText.setAttribute('font-family','JetBrains Mono, monospace');
+cText.setAttribute('font-weight','600');cText.textContent='Work';
+svg.appendChild(cText);
+const cText2=document.createElementNS('http://www.w3.org/2000/svg','text');
+cText2.setAttribute('x',cx);cText2.setAttribute('y',cy+10);
+cText2.setAttribute('text-anchor','middle');cText2.setAttribute('font-size','11');
+cText2.setAttribute('fill','#E8EDF5');cText2.setAttribute('font-family','JetBrains Mono, monospace');
+cText2.setAttribute('font-weight','600');cText2.textContent='Split';
+svg.appendChild(cText2);
+
+const legend=document.getElementById('donut-legend');
+donutData.forEach(d=>{
+  const li=document.createElement('div');li.className='legend-item';
+  li.innerHTML=`<div class="legend-dot" style="background:${d.color}"></div>${d.label} ${d.value}%`;
+  legend.appendChild(li);
+});
+
+/* ======================================================
+   SPARKLINES
+====================================================== */
+const sparkData=[
+  {label:'Accuracy',value:'98.7%',change:'+0.9%',positive:true,data:[96,97,97.5,97,98,98.2,98.7]},
+  {label:'Records/Day',value:'1,240',change:'+12%',positive:true,data:[900,1000,1050,980,1100,1150,1240]},
+  {label:'Error Rate',value:'0.3%',change:'-0.2%',positive:true,data:[1.2,1.0,0.8,0.9,0.6,0.4,0.3]},
+  {label:'Projects',value:'14 live',change:'+3',positive:true,data:[8,9,10,11,12,12,14]},
+];
+const sparkWrap=document.getElementById('sparklines-wrap');
+sparkData.forEach(d=>{
+  const row=document.createElement('div');row.className='sparkline-row';
+  const cvs=document.createElement('canvas');cvs.width=120;cvs.height=36;cvs.style.display='block';
+  row.innerHTML=`<div class="sl-label">${d.label}</div><div class="sl-canvas-wrap"></div><div class="sl-value">${d.value}</div><div class="sl-change ${d.positive?'pos':'neg'}">${d.change}</div>`;
+  row.querySelector('.sl-canvas-wrap').appendChild(cvs);
+  sparkWrap.appendChild(row);
+  // draw sparkline
+  const ctx2=cvs.getContext('2d');
+  const maxV=Math.max(...d.data),minV=Math.min(...d.data);
+  const pts=d.data.map((v,i)=>({
+    x:i/(d.data.length-1)*110+5,
+    y:32-((v-minV)/(maxV-minV+.001))*28
+  }));
+  // fill
+  ctx2.beginPath();ctx2.moveTo(pts[0].x,36);
+  pts.forEach(p=>ctx2.lineTo(p.x,p.y));
+  ctx2.lineTo(pts[pts.length-1].x,36);ctx2.closePath();
+  const grad=ctx2.createLinearGradient(0,0,0,36);
+  grad.addColorStop(0,'rgba(99,210,140,.3)');grad.addColorStop(1,'rgba(99,210,140,0)');
+  ctx2.fillStyle=grad;ctx2.fill();
+  // line
+  ctx2.beginPath();ctx2.moveTo(pts[0].x,pts[0].y);
+  pts.forEach((p,i)=>{
+    if(i>0){
+      const cp1={x:(pts[i-1].x+p.x)/2,y:pts[i-1].y};
+      const cp2={x:(pts[i-1].x+p.x)/2,y:p.y};
+      ctx2.bezierCurveTo(cp1.x,cp1.y,cp2.x,cp2.y,p.x,p.y);
+    }
+  });
+  ctx2.strokeStyle='#63D28C';ctx2.lineWidth=1.5;ctx2.stroke();
+  // dot
+  const last=pts[pts.length-1];
+  ctx2.beginPath();ctx2.arc(last.x,last.y,3,0,Math.PI*2);
+  ctx2.fillStyle='#63D28C';ctx2.fill();
+});
+
+/* ======================================================
+   HEATMAP
+====================================================== */
+const heatmap=document.getElementById('heatmap');
+const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const weeks=['W1','W2','W3','W4'];
+// Header row
+const blank=document.createElement('div');blank.className='hm-label';heatmap.appendChild(blank);
+days.forEach(d=>{
+  const h=document.createElement('div');h.className='hm-col-head';h.textContent=d;heatmap.appendChild(h);
+});
+// Rows
+weeks.forEach(w=>{
+  const wl=document.createElement('div');wl.className='hm-label';wl.textContent=w;heatmap.appendChild(wl);
+  days.forEach(d=>{
+    const val=Math.floor(Math.random()*200+50);
+    const intensity=val/250;
+    const cell=document.createElement('div');cell.className='hm-cell';
+    cell.dataset.tip=`${w} ${d}: ${val} entries`;
+    const g=Math.round(100+intensity*110);
+    cell.style.background=`rgba(99,${g},140,${.15+intensity*.65})`;
+    heatmap.appendChild(cell);
+  });
+});
+
+/* ======================================================
+   TOOLS WHEEL SVG
+====================================================== */
+const toolsSVG=document.getElementById('tools-svg');
+const toolsData=[
+  {label:'Excel',angle:0,color:'#63D28C',icon:'📊'},
+  {label:'Power Query',angle:51.4,color:'#3B82F6',icon:'🔗'},
+  {label:'VBA',angle:102.8,color:'#F59E0B',icon:'⚡'},
+  {label:'Power BI',angle:154.2,color:'#A78BFA',icon:'📈'},
+  {label:'Google Sheets',angle:205.7,color:'#F472B6',icon:'📋'},
+  {label:'Access',angle:257.1,color:'#34D399',icon:'🗄'},
+  {label:'CSV Tools',angle:308.5,color:'#60A5FA',icon:'📁'},
+];
+const cx2=200, cy2=200;
+// Outer ring
+const ring=document.createElementNS('http://www.w3.org/2000/svg','circle');
+ring.setAttribute('cx',cx2);ring.setAttribute('cy',cy2);ring.setAttribute('r',140);
+ring.setAttribute('fill','none');ring.setAttribute('stroke','rgba(99,210,140,0.1)');ring.setAttribute('stroke-width','1');
+toolsSVG.appendChild(ring);
+const ring2=document.createElementNS('http://www.w3.org/2000/svg','circle');
+ring2.setAttribute('cx',cx2);ring2.setAttribute('cy',cy2);ring2.setAttribute('r',80);
+ring2.setAttribute('fill','none');ring2.setAttribute('stroke','rgba(99,210,140,0.07)');ring2.setAttribute('stroke-width','1');
+toolsSVG.appendChild(ring2);
+
+// Centre
+const centreCircle=document.createElementNS('http://www.w3.org/2000/svg','circle');
+centreCircle.setAttribute('cx',cx2);centreCircle.setAttribute('cy',cy2);centreCircle.setAttribute('r',44);
+centreCircle.setAttribute('fill','rgba(99,210,140,0.1)');centreCircle.setAttribute('stroke','rgba(99,210,140,0.3)');centreCircle.setAttribute('stroke-width','1.5');
+toolsSVG.appendChild(centreCircle);
+const centreText=document.createElementNS('http://www.w3.org/2000/svg','text');
+centreText.setAttribute('x',cx2);centreText.setAttribute('y',cy2-6);
+centreText.setAttribute('text-anchor','middle');centreText.setAttribute('font-size','11');
+centreText.setAttribute('fill','#63D28C');centreText.setAttribute('font-family','JetBrains Mono, monospace');
+centreText.setAttribute('font-weight','600');centreText.textContent='Ganesh';
+toolsSVG.appendChild(centreText);
+const centreText2=document.createElementNS('http://www.w3.org/2000/svg','text');
+centreText2.setAttribute('x',cx2);centreText2.setAttribute('y',cy2+8);
+centreText2.setAttribute('text-anchor','middle');centreText2.setAttribute('font-size','9');
+centreText2.setAttribute('fill','#7B8FAB');centreText2.setAttribute('font-family','JetBrains Mono, monospace');
+centreText2.textContent='Expert';
+toolsSVG.appendChild(centreText2);
+
+toolsData.forEach((t,i)=>{
+  const rad=(t.angle-90)*Math.PI/180;
+  const tx=cx2+140*Math.cos(rad), ty=cy2+140*Math.sin(rad);
+  // Spoke
+  const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+  line.setAttribute('x1',cx2);line.setAttribute('y1',cy2);
+  line.setAttribute('x2',tx);line.setAttribute('y2',ty);
+  line.setAttribute('stroke',t.color);line.setAttribute('stroke-width','1');
+  line.setAttribute('opacity','0.2');
+  toolsSVG.appendChild(line);
+  // Circle
+  const circle=document.createElementNS('http://www.w3.org/2000/svg','circle');
+  circle.setAttribute('cx',tx);circle.setAttribute('cy',ty);circle.setAttribute('r',22);
+  circle.setAttribute('fill','rgba(17,24,39,.9)');
+  circle.setAttribute('stroke',t.color);circle.setAttribute('stroke-width','1.5');
+  circle.style.cursor='pointer';
+  circle.style.transition='transform .2s';
+  circle.addEventListener('mouseenter',()=>{ circle.style.transform=`scale(1.15)`;circle.style.transformOrigin=`${tx}px ${ty}px`; });
+  circle.addEventListener('mouseleave',()=>{ circle.style.transform=''; });
+  toolsSVG.appendChild(circle);
+  // Icon (emoji as text)
+  const iText=document.createElementNS('http://www.w3.org/2000/svg','text');
+  iText.setAttribute('x',tx);iText.setAttribute('y',ty+1);
+  iText.setAttribute('text-anchor','middle');iText.setAttribute('dominant-baseline','middle');
+  iText.setAttribute('font-size','15');iText.textContent=t.icon;
+  toolsSVG.appendChild(iText);
+  // Label
+  const lx2=cx2+(140+30)*Math.cos(rad), ly2=cy2+(140+30)*Math.sin(rad);
+  const lText=document.createElementNS('http://www.w3.org/2000/svg','text');
+  lText.setAttribute('x',lx2);lText.setAttribute('y',ly2);
+  lText.setAttribute('text-anchor',tx>cx2?'start':tx<cx2?'end':'middle');
+  lText.setAttribute('dominant-baseline','middle');
+  lText.setAttribute('font-size','9');lText.setAttribute('fill',t.color);
+  lText.setAttribute('font-family','JetBrains Mono, monospace');
+  lText.textContent=t.label;
+  toolsSVG.appendChild(lText);
+  // Animated rotation
+  let angle=t.angle;
+  setInterval(()=>{
+    angle+=.05;
+    const r2=(angle-90)*Math.PI/180;
+    const nx=cx2+140*Math.cos(r2),ny=cy2+140*Math.sin(r2);
+    circle.setAttribute('cx',nx);circle.setAttribute('cy',ny);
+    iText.setAttribute('x',nx);iText.setAttribute('y',ny+1);
+    line.setAttribute('x2',nx);line.setAttribute('y2',ny);
+    const llx=cx2+(140+30)*Math.cos(r2);
+    const lly=cy2+(140+30)*Math.sin(r2);
+    lText.setAttribute('x',llx);lText.setAttribute('y',lly);
+    lText.setAttribute('text-anchor',nx>cx2?'start':nx<cx2?'end':'middle');
+  },16);
+});
+
+/* ======================================================
+   TOOLS LIST
+====================================================== */
+const toolsList=[
+  {icon:'📊',name:'Microsoft Excel',desc:'Advanced / Expert'},
+  {icon:'🔗',name:'Power Query',desc:'ETL & Transform'},
+  {icon:'⚡',name:'VBA / Macros',desc:'Automation'},
+  {icon:'📈',name:'Power BI',desc:'Dashboards'},
+  {icon:'📋',name:'Google Sheets',desc:'Cloud Spreadsheets'},
+  {icon:'🗄','name':'MS Access',desc:'Database Queries'},
+];
+const tl=document.getElementById('tools-list');
+toolsList.forEach(t=>{
+  const div=document.createElement('div');div.className='tool-item fade-in';
+  div.innerHTML=`<div class="tool-icon">${t.icon}</div><div class="tool-text"><strong>${t.name}</strong><span>${t.desc}</span></div>`;
+  tl.appendChild(div);observe(div);
+});
+
+/* ======================================================
+   PROCESS TIMELINE
+====================================================== */
+const processSteps=[
+  {step:'Step 01',heading:'Requirement Gathering',body:'Understand the data structure, sources, and your exact output expectations — format, frequency, and delivery method.'},
+  {step:'Step 02',heading:'Data Audit & Plan',body:'Review existing files, identify quality issues, map transformation needs and define a clear workflow plan.'},
+  {step:'Step 03',heading:'Template / System Setup',body:'Build the Excel structure — sheets, named ranges, validation lists, formulas and automation hooks — before data entry begins.'},
+  {step:'Step 04',heading:'Data Entry & Enrichment',body:'Accurate, validated entry of all records with built-in checks to flag anomalies in real time.'},
+  {step:'Step 05',heading:'QA & Review',body:'100% spot-check against source material, cross-validation with lookups and stakeholder sign-off round.'},
+  {step:'Step 06',heading:'Delivery & Handover',body:'Final file delivered in agreed format with a brief usage guide and 7-day support window for follow-up queries.'},
+];
+const tl2=document.getElementById('timeline');
+processSteps.forEach(s=>{
+  const item=document.createElement('div');item.className='timeline-item';
+  item.innerHTML=`<div class="timeline-dot"></div><div class="timeline-step">${s.step}</div><div class="timeline-heading">${s.heading}</div><div class="timeline-body">${s.body}</div>`;
+  tl2.appendChild(item);observe(item);
+});
+
+/* ======================================================
+   OBSERVE ALL FADE-INS
+====================================================== */
+document.querySelectorAll('.fade-in').forEach(observe);
+
+/* ======================================================
+   CARD SHINE EFFECT
+====================================================== */
+document.querySelectorAll('.service-card,.mode-card').forEach(card=>{
+  card.addEventListener('mousemove',e=>{
+    const r=card.getBoundingClientRect();
+    const x=((e.clientX-r.left)/r.width)*100;
+    const y=((e.clientY-r.top)/r.height)*100;
+    card.style.setProperty('--shine-x',x+'%');
+    card.style.setProperty('--shine-y',y+'%');
+  });
+});
+
+/* ======================================================
+   SMOOTH SCROLL FOR ALL NAV LINKS
+====================================================== */
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',e=>{
+    e.preventDefault();
+    const target=document.querySelector(a.getAttribute('href'));
+    if(target) target.scrollIntoView({behavior:'smooth',block:'start'});
+  });
+});
+
+/* ======================================================
+   CURSOR GLOW EFFECT
+====================================================== */
+const glow=document.createElement('div');
+glow.style.cssText=`position:fixed;width:300px;height:300px;border-radius:50%;
+  background:radial-gradient(circle,rgba(99,210,140,.06),transparent 70%);
+  pointer-events:none;z-index:0;transform:translate(-50%,-50%);transition:left .1s,top .1s;`;
+document.body.appendChild(glow);
+document.addEventListener('mousemove',e=>{ glow.style.left=e.clientX+'px'; glow.style.top=e.clientY+'px'; });
+</script>
+</body>
+</html>
+
